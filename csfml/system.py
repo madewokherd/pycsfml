@@ -19,6 +19,8 @@ import csfml
 
 cwindow = ctypes.CDLL(csfml.module_format % 'system')
 
+Bool = ctypes.c_int
+
 class Vector2f(ctypes.Structure):
     _fields_ = [('x', ctypes.c_float), ('y', ctypes.c_float)]
 
