@@ -21,15 +21,33 @@ import csfml.window
 
 cgraphics = ctypes.CDLL(csfml.module_format % 'graphics')
 
+class Color(ctypes.Structure):
+    _fields_ = [('r', ctypes.c_uint8), ('g', ctypes.c_uint8), ('b', ctypes.c_uint8), ('a', ctypes.c_uint8)]
+
+    def __init__(self, r, g, b, a=255):
+        self.r = r
+        self.g = g
+        self.b = b
+        self.a = a
+
+    def __repr__(self):
+        return 'csfml.graphics.Color(%s,%s,%s,%s)' % (self.r, self.g, self.b, self.a)
+
+    def __mul__(self, oth):
+        return cgraphics.sfColor_modulate(self, oth)
+
+    def __add__(self, oth):
+        return cgraphics.sfColor_add(self, oth)
+
+class Drawable(ctypes.c_void_p):
+    def draw(self, render_target, render_states):
+        raise NotImplementedError()
+
 class Transform(ctypes.Structure):
     _fields_ = [('matrix', ctypes.c_float * 9)]
 
     def __repr__(self):
         return 'csfml.graphics.Transform(%s)' % ','.join(repr(x) for x in self.matrix)
-
-class Drawable(ctypes.c_void_p):
-    def draw(self, render_target, render_states):
-        raise NotImplementedError()
 
 class Transformable(ctypes.c_void_p):
     def __new__(self):
@@ -88,7 +106,23 @@ class Transformable(ctypes.c_void_p):
 
     origin = property(get_origin, set_origin)
 
+Color.black = Color.in_dll(cgraphics, 'sfBlack')
+Color.white = Color.in_dll(cgraphics, 'sfWhite')
+Color.red = Color.in_dll(cgraphics, 'sfRed')
+Color.green = Color.in_dll(cgraphics, 'sfGreen')
+Color.blue = Color.in_dll(cgraphics, 'sfBlue')
+Color.yellow = Color.in_dll(cgraphics, 'sfYellow')
+Color.magenta = Color.in_dll(cgraphics, 'sfMagenta')
+Color.cyan = Color.in_dll(cgraphics, 'sfCyan')
+Color.transparent = Color.in_dll(cgraphics, 'sfTransparent')
+
 Transform.identity = Transform.in_dll(cgraphics, 'sfTransform_Identity')
+
+cgraphics.sfColor_add.argtypes = [Color, Color]
+cgraphics.sfColor_add.restype = Color
+
+cgraphics.sfColor_modulate.argtypes = [Color, Color]
+cgraphics.sfColor_modulate.restype = Color
 
 cgraphics.sfTransformable_create.argtypes = []
 cgraphics.sfTransformable_create.restype = Transformable
