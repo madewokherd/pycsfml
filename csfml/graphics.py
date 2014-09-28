@@ -43,6 +43,46 @@ class Drawable(ctypes.c_void_p):
     def draw(self, render_target, render_states):
         raise NotImplementedError()
 
+class FloatRect(ctypes.Structure):
+    _fields_ = [('left', ctypes.c_float), ('top', ctypes.c_float), ('width', ctypes.c_float), ('height', ctypes.c_float)]
+
+    @staticmethod
+    def from_vectors(position, size):
+       return FloatRect(position.x, position.y, size.x, size.y)
+
+    def __repr__(self):
+        return 'csfml.graphics.FloatRect(%s,%s,%s,%s)' % (self.left, self.top, self.width, self.height)
+
+    def __contains__(self, vector):
+        return bool(cgraphics.sfFloatRect_contains(ctypes.byref(self), *vector))
+
+    contains = __contains__
+
+    def intersects(self, other):
+        intersection = FloatRect()
+        if cgraphics.sfFloatRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
+            return intersection
+
+class IntRect(ctypes.Structure):
+    _fields_ = [('left', ctypes.c_int), ('top', ctypes.c_int), ('width', ctypes.c_int), ('height', ctypes.c_int)]
+
+    @staticmethod
+    def from_vectors(position, size):
+       return IntRect(position.x, position.y, size.x, size.y)
+
+    def __repr__(self):
+        return 'csfml.graphics.IntRect(%s,%s,%s,%s)' % (self.left, self.top, self.width, self.height)
+
+    def __contains__(self, vector):
+        return bool(cgraphics.sfIntRect_contains(ctypes.byref(self), *vector))
+
+    contains = __contains__
+
+    def intersects(self, other):
+        intersection = IntRect()
+        if cgraphics.sfIntRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
+            return intersection
+
 class Transform(ctypes.Structure):
     _fields_ = [('matrix', ctypes.c_float * 9)]
 
@@ -123,6 +163,18 @@ cgraphics.sfColor_add.restype = Color
 
 cgraphics.sfColor_modulate.argtypes = [Color, Color]
 cgraphics.sfColor_modulate.restype = Color
+
+cgraphics.sfFloatRect_contains.argtypes = [ctypes.POINTER(FloatRect), ctypes.c_float, ctypes.c_float]
+cgraphics.sfFloatRect_contains.restype = csfml.system.Bool
+
+cgraphics.sfFloatRect_intersects.argtypes = [ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect)]
+cgraphics.sfFloatRect_intersects.restype = csfml.system.Bool
+
+cgraphics.sfIntRect_contains.argtypes = [ctypes.POINTER(IntRect), ctypes.c_int, ctypes.c_int]
+cgraphics.sfIntRect_contains.restype = csfml.system.Bool
+
+cgraphics.sfIntRect_intersects.argtypes = [ctypes.POINTER(IntRect), ctypes.POINTER(IntRect), ctypes.POINTER(IntRect)]
+cgraphics.sfIntRect_intersects.restype = csfml.system.Bool
 
 cgraphics.sfTransformable_create.argtypes = []
 cgraphics.sfTransformable_create.restype = Transformable
