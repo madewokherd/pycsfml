@@ -21,6 +21,12 @@ import csfml.window
 
 cgraphics = ctypes.CDLL(csfml.module_format % 'graphics')
 
+class BlendMode(csfml.system.Enum):
+    BlendAlpha = 0
+    BlendAdd = 1
+    BlendMultiply = 2
+    BlendNone = 3
+
 class Color(ctypes.Structure):
     _fields_ = [('r', ctypes.c_uint8), ('g', ctypes.c_uint8), ('b', ctypes.c_uint8), ('a', ctypes.c_uint8)]
 
