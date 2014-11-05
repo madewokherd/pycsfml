@@ -23,6 +23,28 @@ Bool = ctypes.c_int
 
 Enum = ctypes.c_int
 
+class _InputStream(ctypes.Structure):
+    ReadFunc = ctypes.CFUNCTYPE(ctypes.c_int64,
+                                ctypes.c_void_p, #data
+                                ctypes.c_int64, #size
+                                ctypes.c_void_p) #userdata
+
+    SeekFunc = ctypes.CFUNCTYPE(ctypes.c_int64,
+                                ctypes.c_int64, #position
+                                ctypes.c_void_p) #userdata
+
+    TellFunc = ctypes.CFUNCTYPE(ctypes.c_int64,
+                                ctypes.c_void_p) #userdata
+
+    GetSizeFunc = ctypes.CFUNCTYPE(ctypes.c_int64,
+                                   ctypes.c_void_p) #userdata
+
+    _fields_ = [('_read', ReadFunc),
+                ('_seek', SeekFunc),
+                ('_tell', TellFunc),
+                ('_get_size', GetSizeFunc),
+                ('_userdata', ctypes.c_void_p)]
+
 class Vector2f(ctypes.Structure):
     _fields_ = [('x', ctypes.c_float), ('y', ctypes.c_float)]
 
