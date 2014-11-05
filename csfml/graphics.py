@@ -69,6 +69,80 @@ class FloatRect(ctypes.Structure):
         if cgraphics.sfFloatRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
             return intersection
 
+class Image(ctypes.c_void_p):
+    def __init__(self, width, height):
+        res = cgraphics.sfImage_create(width, height)
+        self.value = res.value
+        res.value = 0
+
+    @staticmethod
+    def from_color(width, height, color):
+        return cgraphics.sfImage_createFromColor(width, height, color)
+
+    @staticmethod
+    def from_pixels(width, height, pixels):
+        return cgraphics.sfImage_createFromPixels(width, height, pixels)
+
+    @staticmethod
+    def from_file(filename):
+        return cgraphics.sfImage_createFromFile(filename)
+
+    @staticmethod
+    def from_memory(data, size):
+        return cgraphics.sfImage_createFromMemory(data, size)
+
+    @staticmethod
+    def from_stream(stream):
+        return cgraphics.sfImage_createFromStream(stream)
+
+    def copy(self):
+        return cgraphics.sfImage_copy(self)
+
+    def __del__(self):
+        if self.value != 0:
+            cgraphics.sfImage_destroy(self)
+            self.value = 0
+
+    def save_to_file(self, filename):
+        if not cgraphics.sfImage_saveToFile(self, filename):
+            raise Exception("save failed")
+
+    def get_size(self):
+        return cgraphics.sfImage_getSize(self)
+
+    def get_width(self):
+        return cgraphics.sfImage_getSize(self).x
+
+    def get_height(self):
+        return cgraphics.sfImage_getSize(self).y
+
+    size = property(get_size)
+
+    width = property(get_width)
+
+    height = property(get_height)
+
+    def create_mask_from_color(self, color, alpha):
+        cgraphics.sfImage_createMaskFromColor(self, color, alpha)
+
+    def copy_image(self, source, dest_x, dest_y, source_rect, apply_alpha):
+        cgraphics.sfImage_copyImage(self, source, dest_x, dest_y, source_rect, apply_alpha)
+
+    def set_pixel(self, x, y, color):
+        cgraphics.sfImage_setPixel(self, x, y, color)
+
+    def get_pixel(self, x, y):
+        return cgraphics.sfImage_getPixel(self, x, y)
+
+    def get_pixels_ptr(self):
+        return cgraphics.sfImage_getPixelsPtr(self)
+
+    def flip_horizontally(self):
+        cgraphics.sfImage_flipHorizontally(self)
+
+    def flip_vertically(self):
+        cgraphics.sfImage_flipVertically(self)
+
 class IntRect(ctypes.Structure):
     _fields_ = [('left', ctypes.c_int), ('top', ctypes.c_int), ('width', ctypes.c_int), ('height', ctypes.c_int)]
 
@@ -175,6 +249,57 @@ cgraphics.sfFloatRect_contains.restype = csfml.system.Bool
 
 cgraphics.sfFloatRect_intersects.argtypes = [ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect)]
 cgraphics.sfFloatRect_intersects.restype = csfml.system.Bool
+
+cgraphics.sfImage_create.argtypes = [ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfImage_create.restype = Image
+
+cgraphics.sfImage_createFromColor.argtypes = [ctypes.c_uint, ctypes.c_uint, Color]
+cgraphics.sfImage_createFromColor.restype = Image
+
+cgraphics.sfImage_createFromPixels.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
+cgraphics.sfImage_createFromPixels.restype = Image
+
+cgraphics.sfImage_createFromFile.argtypes = [ctypes.c_char_p]
+cgraphics.sfImage_createFromFile.restype = Image
+
+cgraphics.sfImage_createFromMemory.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+cgraphics.sfImage_createFromMemory.restype = Image
+
+cgraphics.sfImage_createFromStream.argtypes = [csfml.system._InputStream]
+cgraphics.sfImage_createFromStream.restype = Image
+
+cgraphics.sfImage_copy.argtypes = [Image]
+cgraphics.sfImage_copy.restype = Image
+
+cgraphics.sfImage_destroy.argtypes = [Image]
+cgraphics.sfImage_destroy.restype = None
+
+cgraphics.sfImage_saveToFile.argtypes = [Image, ctypes.c_char_p]
+cgraphics.sfImage_saveToFile.restype = csfml.system.Bool
+
+cgraphics.sfImage_getSize.argtypes = [Image]
+cgraphics.sfImage_getSize.restype = csfml.system.Vector2u
+
+cgraphics.sfImage_createMaskFromColor.argtypes = [Image, Color, ctypes.c_uint8]
+cgraphics.sfImage_createMaskFromColor.restype = None
+
+cgraphics.sfImage_copyImage.argtypes = [Image, Image, ctypes.c_uint, ctypes.c_uint, IntRect, csfml.system.Bool]
+cgraphics.sfImage_copyImage.restype = None
+
+cgraphics.sfImage_setPixel.argtypes = [Image, ctypes.c_uint, ctypes.c_uint, Color]
+cgraphics.sfImage_setPixel.restype = None
+
+cgraphics.sfImage_getPixel.argtypes = [Image, ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfImage_getPixel.restype = Color
+
+cgraphics.sfImage_getPixelsPtr.argtypes = [Image]
+cgraphics.sfImage_getPixelsPtr.restype = ctypes.c_void_p
+
+cgraphics.sfImage_flipHorizontally.argtypes = [Image]
+cgraphics.sfImage_flipHorizontally.restype = None
+
+cgraphics.sfImage_flipVertically.argtypes = [Image]
+cgraphics.sfImage_flipVertically.restype = None
 
 cgraphics.sfIntRect_contains.argtypes = [ctypes.POINTER(IntRect), ctypes.c_int, ctypes.c_int]
 cgraphics.sfIntRect_contains.restype = csfml.system.Bool

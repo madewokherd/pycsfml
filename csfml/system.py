@@ -17,7 +17,7 @@ import ctypes
 
 import csfml
 
-cwindow = ctypes.CDLL(csfml.module_format % 'system')
+csystem = ctypes.CDLL(csfml.module_format % 'system')
 
 Bool = ctypes.c_int
 
@@ -59,4 +59,19 @@ class Vector2f(ctypes.Structure):
 
     def __repr__(self):
         return 'csfml.system.Vector2f(%s, %s)' % (repr(self.x), repr(self.y))
+
+class Vector2u(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_uint), ('y', ctypes.c_uint)]
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            return ctypes.Structure.__init__(self, *args[0])
+        else:
+            return ctypes.Structure.__init__(self, *args)
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+    def __repr__(self):
+        return 'csfml.system.Vector2u(%s, %s)' % (repr(self.x), repr(self.y))
 
