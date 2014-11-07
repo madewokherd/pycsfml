@@ -20,6 +20,8 @@ import csfml.system
 
 cwindow = ctypes.CDLL(csfml.module_format % 'window')
 
+WindowHandle = csfml.window_handle_type
+
 class ContextSettings(ctypes.Structure):
     _fields_ = [('depth_bits', ctypes.c_uint),
                 ('stencil_bits', ctypes.c_uint),

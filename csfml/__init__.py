@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import ctypes
 import os
 import sys
 
@@ -20,8 +21,10 @@ __all__ = ['module_format', 'graphics']
 
 if sys.platform == 'linux2':
     module_format = 'libcsfml-%s.so'
+    window_handle_type = ctypes.c_ulong
 elif sys.platform == 'win32':
     module_format = 'csfml-%s-2.dll'
+    window_handle_type = ctypes.c_void_p
 else:
     raise NotImplementedError("Don't know how to find CSFML libraries on this platform")
 
