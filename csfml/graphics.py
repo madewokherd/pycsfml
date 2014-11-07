@@ -226,6 +226,63 @@ class Transformable(ctypes.c_void_p):
 
     origin = property(get_origin, set_origin)
 
+class View(ctypes.c_void_p):
+    def __new__(self, *args):
+        return cgraphics.sfView_create()
+
+    def __init__(self, rectangle=None):
+        if rectangle is not None:
+            self.reset(rectangle)
+
+    def copy(self):
+        return cgraphics.sfView_copy(self)
+
+    def __del__(self):
+        if self.value != 0:
+            cgraphics.sfView_destroy(self)
+            self.value = 0
+
+    def set_center(self, *center):
+        cgraphics.sfView_setCenter(self, csfml.system.Vector2f(*center))
+
+    def set_size(self, *size):
+        cgraphics.sfView_setSize(self, csfml.system.Vector2f(*size))
+
+    def set_rotation(self, angle):
+        cgraphics.sfView_setRotation(self, angle)
+
+    def set_viewport(self, viewport):
+        cgraphics.sfView_setViewport(self, viewport)
+
+    def reset(self, rectangle):
+        cgraphics.sfView_reset(self, rectangle)
+
+    def get_center(self):
+        return cgraphics.sfView_getCenter(self)
+
+    def get_size(self):
+        return cgraphics.sfView_getSize(self)
+
+    def get_rotation(self):
+        return cgraphics.sfView_getRotation(self)
+
+    def get_viewport(self):
+        return cgraphics.sfView_getViewport(self)
+
+    def move(self, *offset):
+        cgraphics.sfView_move(self, csfml.system.Vector2f(*offset))
+
+    def rotate(self, angle):
+        cgraphics.sfView_rotate(self, angle)
+
+    def zoom(self, factor):
+        cgraphics.sfView_zoom(self, factor)
+
+    center = property(get_center, set_center)
+    size = property(get_size, set_size)
+    rotation = property(get_rotation, set_rotation)
+    viewport = property(get_viewport, set_viewport)
+
 Color.black = Color.in_dll(cgraphics, 'sfBlack')
 Color.white = Color.in_dll(cgraphics, 'sfWhite')
 Color.red = Color.in_dll(cgraphics, 'sfRed')
@@ -354,4 +411,52 @@ cgraphics.sfTransformable_getTransform.restype = Transform
 
 cgraphics.sfTransformable_getInverseTransform.argtypes = [Transformable]
 cgraphics.sfTransformable_getInverseTransform.restype = Transform
+
+cgraphics.sfView_create.argtypes = []
+cgraphics.sfView_create.restype = View
+
+cgraphics.sfView_createFromRect.argtypes = [FloatRect]
+cgraphics.sfView_createFromRect.restype = View
+
+cgraphics.sfView_copy.argtypes = [View]
+cgraphics.sfView_copy.restype = View
+
+cgraphics.sfView_destroy.argtypes = [View]
+cgraphics.sfView_destroy.restype = None
+
+cgraphics.sfView_setCenter.argtypes = [View, csfml.system.Vector2f]
+cgraphics.sfView_setCenter.restype = None
+
+cgraphics.sfView_setSize.argtypes = [View, csfml.system.Vector2f]
+cgraphics.sfView_setSize.restype = None
+
+cgraphics.sfView_setRotation.argtypes = [View, ctypes.c_float]
+cgraphics.sfView_setRotation.restype = None
+
+cgraphics.sfView_setViewport.argtypes = [View, FloatRect]
+cgraphics.sfView_setViewport.restype = None
+
+cgraphics.sfView_reset.argtypes = [View, FloatRect]
+cgraphics.sfView_reset.restype = None
+
+cgraphics.sfView_getCenter.argtypes = [View]
+cgraphics.sfView_getCenter.restype = csfml.system.Vector2f
+
+cgraphics.sfView_getSize.argtypes = [View]
+cgraphics.sfView_getSize.restype = csfml.system.Vector2f
+
+cgraphics.sfView_getRotation.argtypes = [View]
+cgraphics.sfView_getRotation.restype = ctypes.c_float
+
+cgraphics.sfView_getViewport.argtypes = [View]
+cgraphics.sfView_getViewport.restype = FloatRect
+
+cgraphics.sfView_move.argtypes = [View, csfml.system.Vector2f]
+cgraphics.sfView_move.restype = None
+
+cgraphics.sfView_rotate.argtypes = [View, ctypes.c_float]
+cgraphics.sfView_rotate.restype = None
+
+cgraphics.sfView_zoom.argtypes = [View, ctypes.c_float]
+cgraphics.sfView_zoom.restype = None
 
