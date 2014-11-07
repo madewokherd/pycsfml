@@ -29,6 +29,11 @@ class ContextSettings(ctypes.Structure):
                 ('major_version', ctypes.c_uint),
                 ('minor_version', ctypes.c_uint)]
 
+class Event(ctypes.Structure):
+    _fields_ = [('event_type', csfml.system.Enum)]
+
+    # FIXME: Add specific event types and conversion to them
+
 class VideoMode(ctypes.Structure):
     _fields_ = [('width', ctypes.c_uint), ('height', ctypes.c_uint), ('bits_per_pixel', ctypes.c_uint)]
 
