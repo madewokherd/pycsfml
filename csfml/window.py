@@ -20,19 +20,26 @@ import csfml.system
 
 cwindow = ctypes.CDLL(csfml.module_format % 'window')
 
-class VideoMode(ctypes.Structure):
-    _fields_ = [('width', ctypes.c_uint), ('height', ctypes.c_uint), ('bitsPerPixel', ctypes.c_uint)]
+class ContextSettings(ctypes.Structure):
+    _fields_ = [('depth_bits', ctypes.c_uint),
+                ('stencil_bits', ctypes.c_uint),
+                ('antialiasing_level', ctypes.c_uint),
+                ('major_version', ctypes.c_uint),
+                ('minor_version', ctypes.c_uint)]
 
-    def __init__(self, width=0, height=0, bitsPerPixel=32):
+class VideoMode(ctypes.Structure):
+    _fields_ = [('width', ctypes.c_uint), ('height', ctypes.c_uint), ('bits_per_pixel', ctypes.c_uint)]
+
+    def __init__(self, width=0, height=0, bits_per_pixel=32):
         self.width = width
         self.height = height
-        self.bitsPerPixel = bitsPerPixel
+        self.bits_per_pixel = bits_per_pixel
 
     def __iter__(self):
         return iter((self.x, self.y))
 
     def __repr__(self):
-        return 'csfml.window.VideoMode(%s,%s,%s)' % (self.width, self.height, self.bitsPerPixel)
+        return 'csfml.window.VideoMode(%s,%s,%s)' % (self.width, self.height, self.bits_per_pixel)
 
     def is_valid(self):
         return bool(cwindow.sfVideoMode_isValid(self))
