@@ -456,6 +456,15 @@ Color.transparent = Color.in_dll(cgraphics, 'sfTransparent')
 
 Transform.identity = Transform.in_dll(cgraphics, 'sfTransform_Identity')
 
+class RenderStates(ctypes.Structure):
+    _fields_ = [('blend_mode', BlendMode),
+                ('transform', Transform),
+                ('texture', Texture),
+                ('shader', Shader)]
+
+    def __init__(self, blend_mode=BlendMode.BlendAlpha, transform=Transform.identity, texture=None, shader=None):
+        ctypes.Structure.__init__(self, blend_mode, transform, texture, shader)
+
 cgraphics.sfColor_add.argtypes = [Color, Color]
 cgraphics.sfColor_add.restype = Color
 
