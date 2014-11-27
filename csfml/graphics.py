@@ -69,6 +69,46 @@ class FloatRect(ctypes.Structure):
         if cgraphics.sfFloatRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
             return intersection
 
+class Font(ctypes.c_void_p):
+    def __init__(self, filename):
+        result = cgraphics.sfFont_createFromFile(filename)
+        self.value = result.value
+        result.value = 0
+
+    @staticmethod
+    def from_file(filename):
+        return cgraphics.sfFont_createFromFile(filename)
+
+    @staticmethod
+    def from_memory(data, size):
+        return cgraphics.sfFont_createFromMemory(data, size)
+
+    @staticmethod
+    def from_stream(stream):
+        return cgraphics.sfFont_createFromStream(stream)
+
+    def copy(self):
+        return cgraphics.sfFont_copy(self)
+
+    def __del__(self):
+        if self.value != 0:
+            cgraphics.sfFont_destroy(self)
+            self.value = 0
+
+    def get_glyph(self, code_point, character_size, bold):
+        return cgraphics.sfFont_getGlyph(self, code_point, character_size, bold)
+
+    def get_kerning(self, first, second, character_size):
+        return cgraphics.sfFont_getKerning(self, first, second, character_size)
+
+    def get_line_spacing(self, character_size):
+        return cgraphics.sfFont_getLineSpacing(self, character_size)
+
+    def get_texture(self, character_size):
+        result = cgraphics.sfFont_getTexture(self, character_size)
+        result._const = True
+        return result
+
 class Image(ctypes.c_void_p):
     def __init__(self, width, height):
         res = cgraphics.sfImage_create(width, height)
@@ -162,6 +202,11 @@ class IntRect(ctypes.Structure):
         intersection = IntRect()
         if cgraphics.sfIntRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
             return intersection
+
+class Glyph(ctypes.Structure):
+    _fields_ = [('advance', ctypes.c_int),
+                ('bounds', IntRect),
+                ('texture_rect', IntRect)]
 
 RenderWindow = ctypes.c_void_p # FIXME
 
@@ -590,6 +635,33 @@ cgraphics.sfFloatRect_contains.restype = csfml.system.Bool
 
 cgraphics.sfFloatRect_intersects.argtypes = [ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect), ctypes.POINTER(FloatRect)]
 cgraphics.sfFloatRect_intersects.restype = csfml.system.Bool
+
+cgraphics.sfFont_createFromFile.argtypes = [ctypes.c_char_p]
+cgraphics.sfFont_createFromFile.restype = Font
+
+cgraphics.sfFont_createFromMemory.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+cgraphics.sfFont_createFromMemory.restype = Font
+
+cgraphics.sfFont_createFromStream.argtypes = [csfml.system._InputStream]
+cgraphics.sfFont_createFromStream.restype = Font
+
+cgraphics.sfFont_copy.argtypes = [Font]
+cgraphics.sfFont_copy.restype = Font
+
+cgraphics.sfFont_destroy.argtypes = [Font]
+cgraphics.sfFont_destroy.restype = None
+
+cgraphics.sfFont_getGlyph.argtypes = [Font, ctypes.c_uint32, ctypes.c_uint, csfml.system.Bool]
+cgraphics.sfFont_getGlyph.restype = Glyph
+
+cgraphics.sfFont_getKerning.argtypes = [Font, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint]
+cgraphics.sfFont_getKerning.restype = ctypes.c_int
+
+cgraphics.sfFont_getLineSpacing.argtypes = [Font, ctypes.c_uint]
+cgraphics.sfFont_getLineSpacing.restype = ctypes.c_int
+
+cgraphics.sfFont_getTexture.argtypes = [Font, ctypes.c_uint]
+cgraphics.sfFont_getTexture.restype = Texture
 
 cgraphics.sfImage_create.argtypes = [ctypes.c_uint, ctypes.c_uint]
 cgraphics.sfImage_create.restype = Image
