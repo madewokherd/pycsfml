@@ -163,6 +163,107 @@ class IntRect(ctypes.Structure):
         if cgraphics.sfIntRect_intersects(ctypes.byref(self), ctypes.byref(other), ctypes.byref(intersection)):
             return intersection
 
+RenderWindow = ctypes.c_void_p # FIXME
+
+class Texture(ctypes.c_void_p):
+    def __init__(self, width, height):
+        result = cgraphics.sfTexture_create(width, height)
+        self.value = result.value
+        result.value = 0
+
+    @staticmethod
+    def from_file(filename, area=None):
+        if area is None:
+            area = POINTER(IntRect)()
+        else:
+            area = ctypes.byref(area)
+        return cgraphics.sfTexture_createFromFile(filename, area)
+
+    @staticmethod
+    def from_memory(data, size, area=None):
+        if area is None:
+            area = POINTER(IntRect)()
+        else:
+            area = ctypes.byref(area)
+        return cgraphics.sfTexture_createFromMemory(data, size, area)
+
+    @staticmethod
+    def from_stream(stream, area=None):
+        if area is None:
+            area = POINTER(IntRect)()
+        else:
+            area = ctypes.byref(area)
+        return cgraphics.sfTexture_createFromStream(stream, area)
+
+    @staticmethod
+    def from_image(image, area=None):
+        if area is None:
+            area = POINTER(IntRect)()
+        else:
+            area = ctypes.byref(area)
+        return cgraphics.sfTexture_createFromImage(image, area)
+
+    def copy(self):
+        return cgraphics.sfTexture_copy(self)
+
+    def __del__(self):
+        if self.value != 0:
+            cgraphics.sfTexture_destroy(self)
+            self.value = 0
+
+    def get_size(self):
+        return cgraphics.sfTexture_getSize(self)
+
+    def get_width(self):
+        return cgraphics.sfTexture_getSize(self).x
+
+    def get_height(self):
+        return cgraphics.sfTexture_getSize(self).y
+
+    size = property(get_size)
+
+    width = property(get_width)
+
+    height = property(get_height)
+
+    def copy_to_image(self):
+        return cgraphics.sfTexture_copyToImage(self)
+
+    def update_from_pixels(self, pixels, width, height, x, y):
+        cgraphics.sfTexture_updateFromPixels(self, pixels, width, height, x, y)
+
+    def update_from_image(self, image, x, y):
+        cgraphics.sfTexture_updateFromImage(self, image, x, y)
+
+    def update_from_window(self, window, x, y):
+        cgraphics.sfTexture_updateFromWindow(self, window, x, y)
+
+    def update_from_render_window(self, render_window, x, y):
+        cgraphics.sfTexture_updateFromRenderWindow(self, render_window, x, y)
+
+    def set_smooth(self, smooth):
+        cgraphics.sfTexture_setSmooth(self, smooth)
+
+    def is_smooth(self):
+        return bool(cgraphics.sfTexture_isSmooth)
+
+    smooth = property(is_smooth, set_smooth)
+
+    def set_repeated(self, repeated):
+        cgraphics.sfTexture_setRepeated(self, repeated)
+
+    def is_repeated(self):
+        return bool(cgraphics.sfTexture_isRepeated(self))
+
+    repeated = property(is_repeated, set_repeated)
+
+    def bind(self):
+        cgraphics.sfTexture_bind(self)
+
+    @staticmethod
+    def get_maximum_size():
+        return cgraphics.sfTexture_getMaximumSize()
+
 class Transform(ctypes.Structure):
     _fields_ = [('matrix', ctypes.c_float * 9)]
 
@@ -363,6 +464,63 @@ cgraphics.sfIntRect_contains.restype = csfml.system.Bool
 
 cgraphics.sfIntRect_intersects.argtypes = [ctypes.POINTER(IntRect), ctypes.POINTER(IntRect), ctypes.POINTER(IntRect)]
 cgraphics.sfIntRect_intersects.restype = csfml.system.Bool
+
+cgraphics.sfTexture_create.argtypes = [ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfTexture_create.restype = Texture
+
+cgraphics.sfTexture_createFromFile.argtypes = [ctypes.c_char_p, ctypes.POINTER(IntRect)]
+cgraphics.sfTexture_createFromFile.restype = Texture
+
+cgraphics.sfTexture_createFromMemory.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(IntRect)]
+cgraphics.sfTexture_createFromMemory.restype = Texture
+
+cgraphics.sfTexture_createFromStream.argtypes = [csfml.system._InputStream, ctypes.POINTER(IntRect)]
+cgraphics.sfTexture_createFromStream.restype = Texture
+
+cgraphics.sfTexture_createFromImage.argtypes = [Image, ctypes.POINTER(IntRect)]
+cgraphics.sfTexture_createFromImage.restype = Texture
+
+cgraphics.sfTexture_copy.argtypes = [Texture]
+cgraphics.sfTexture_copy.restype = Texture
+
+cgraphics.sfTexture_destroy.argtypes = [Texture]
+cgraphics.sfTexture_destroy.restype = None
+
+cgraphics.sfTexture_getSize.argtypes = [Texture]
+cgraphics.sfTexture_getSize.restype = csfml.system.Vector2u
+
+cgraphics.sfTexture_copyToImage.argtypes = [Texture]
+cgraphics.sfTexture_copyToImage.restype = Image
+
+cgraphics.sfTexture_updateFromPixels.argtypes = [Texture, ctypes.POINTER(ctypes.c_uint8), ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfTexture_updateFromPixels.restype = None
+
+cgraphics.sfTexture_updateFromImage.argtypes = [Texture, Image, ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfTexture_updateFromImage.restype = None
+
+cgraphics.sfTexture_updateFromWindow.argtypes = [Texture, csfml.window.Window, ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfTexture_updateFromWindow.restype = None
+
+cgraphics.sfTexture_updateFromRenderWindow.argtypes = [Texture, RenderWindow, ctypes.c_uint, ctypes.c_uint]
+cgraphics.sfTexture_updateFromRenderWindow.restype = None
+
+cgraphics.sfTexture_setSmooth.argtypes = [Texture, csfml.system.Bool]
+cgraphics.sfTexture_setSmooth.restype = None
+
+cgraphics.sfTexture_isSmooth.argtypes = [Texture]
+cgraphics.sfTexture_isSmooth.restype = csfml.system.Bool
+
+cgraphics.sfTexture_setRepeated.argtypes = [Texture, csfml.system.Bool]
+cgraphics.sfTexture_setRepeated.restype = None
+
+cgraphics.sfTexture_isRepeated.argtypes = [Texture]
+cgraphics.sfTexture_isRepeated.restype = csfml.system.Bool
+
+cgraphics.sfTexture_bind.argtypes = [Texture]
+cgraphics.sfTexture_bind.restype = None
+
+cgraphics.sfTexture_getMaximumSize.argtypes = []
+cgraphics.sfTexture_getMaximumSize.restype = ctypes.c_uint
 
 cgraphics.sfTransformable_create.argtypes = []
 cgraphics.sfTransformable_create.restype = Transformable
