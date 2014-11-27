@@ -90,3 +90,48 @@ class Vector2u(ctypes.Structure):
     def __repr__(self):
         return 'csfml.system.Vector2u(%s, %s)' % (repr(self.x), repr(self.y))
 
+class Vector3f(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_float), ('y', ctypes.c_float), ('z', ctypes.c_float)]
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            return ctypes.Structure.__init__(self, *args[0])
+        else:
+            return ctypes.Structure.__init__(self, *args)
+
+    def __iter__(self):
+        return iter((self.x, self.y, self.z))
+
+    def __repr__(self):
+        return 'csfml.system.Vector3f(%s, %s, %s)' % (repr(self.x), repr(self.y). repr(self.z))
+
+class Vector3i(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_int), ('y', ctypes.c_int), ('z', ctypes.c_int)]
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            return ctypes.Structure.__init__(self, *args[0])
+        else:
+            return ctypes.Structure.__init__(self, *args)
+
+    def __iter__(self):
+        return iter((self.x, self.y, self.z))
+
+    def __repr__(self):
+        return 'csfml.system.Vector3i(%s, %s, %s)' % (repr(self.x), repr(self.y). repr(self.z))
+
+class Vector3u(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_uint), ('y', ctypes.c_uint), ('z', ctypes.c_uint)]
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            return ctypes.Structure.__init__(self, *args[0])
+        else:
+            return ctypes.Structure.__init__(self, *args)
+
+    def __iter__(self):
+        return iter((self.x, self.y, self.z))
+
+    def __repr__(self):
+        return 'csfml.system.Vector3u(%s, %s, %s)' % (repr(self.x), repr(self.y). repr(self.z))
+

@@ -165,6 +165,66 @@ class IntRect(ctypes.Structure):
 
 RenderWindow = ctypes.c_void_p # FIXME
 
+class Shader(ctypes.c_void_p):
+    def __init__(self):
+        raise TypeError("use Shader.from_file, Shader.from_memory, or Shader.from_stream")
+
+    @staticmethod
+    def from_file(vertex_shader_filename, fragment_shader_filename):
+        return cgraphics.sfShader_createFromFile(vertex_shader_filename, fragment_shader_filename)
+
+    @staticmethod
+    def from_memory(vertex_shader, fragment_shader):
+        return cgraphics.sfShader_createFromMemory(vertex_shader, fragment_shader)
+
+    @staticmethod
+    def from_stream(vertex_shader_stream, fragment_shader_stream):
+        return cgraphics.sfShader_createFromStream(vertex_shader_stream, fragment_shader_stream)
+
+    def __del__(self):
+        if self.value != 0:
+            cgraphics.sfShader_destroy(self)
+            self.value = 0
+
+    # FIXME: Make a "params" object so we can do e.g. 'shader.params.name = 2.0'?
+
+    def set_float_parameter(self, name, x):
+        cgraphics.sfShader_setFloatParameter(self, name, x)
+
+    def set_float2_parameter(self, name, x, y):
+        cgraphics.sfShader_setFloat2Parameter(self, name, x, y)
+
+    def set_float3_parameter(self, name, x, y, z):
+        cgraphics.sfShader_setFloat3Parameter(self, name, x, y, z)
+
+    def set_float4_parameter(self, name, x, y, z, w):
+        cgraphics.sfShader_setFloat4Parameter(self, name, x, y, z, w)
+
+    def set_vector2_parameter(self, name, vector):
+        cgraphics.sfShader_setVector2Parameter(self, name, vector)
+
+    def set_vector3_parameter(self, name, vector):
+        cgraphics.sfShader_setVector3Parameter(self, name, vector)
+
+    def set_color_parameter(self, name, color):
+        cgraphics.sfShader_setColorParameter(self, name, color)
+
+    def set_transform_parameter(self, name, transform):
+        cgraphics.sfShader_setTransformParameter(self, name, transform)
+
+    def set_texture_parameter(self, name, texture):
+        cgraphics.sfShader_setTextureParameter(self, name, texture)
+
+    def set_current_texture_parameter(self, name):
+        cgraphics.sfShader_setCurrentTextureParameter(self, name)
+
+    def bind(self):
+        cgraphics.sfShader_bind(self)
+
+    @staticmethod
+    def is_available():
+        return bool(cgraphics.sfShader_isAvailable())
+
 class Texture(ctypes.c_void_p):
     def __init__(self, width, height):
         result = cgraphics.sfTexture_create(width, height)
@@ -464,6 +524,54 @@ cgraphics.sfIntRect_contains.restype = csfml.system.Bool
 
 cgraphics.sfIntRect_intersects.argtypes = [ctypes.POINTER(IntRect), ctypes.POINTER(IntRect), ctypes.POINTER(IntRect)]
 cgraphics.sfIntRect_intersects.restype = csfml.system.Bool
+
+cgraphics.sfShader_createFromFile.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+cgraphics.sfShader_createFromFile.restype = Shader
+
+cgraphics.sfShader_createFromMemory.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+cgraphics.sfShader_createFromMemory.restype = Shader
+
+cgraphics.sfShader_createFromStream.argtypes = [csfml.system._InputStream, csfml.system._InputStream]
+cgraphics.sfShader_createFromStream.restype = Shader
+
+cgraphics.sfShader_destroy.argtypes = [Shader]
+cgraphics.sfShader_destroy.restype = None
+
+cgraphics.sfShader_setFloatParameter.argtypes = [Shader, ctypes.c_char_p, ctypes.c_float]
+cgraphics.sfShader_setFloatParameter.restype = None
+
+cgraphics.sfShader_setFloat2Parameter.argtypes = [Shader, ctypes.c_char_p, ctypes.c_float, ctypes.c_float]
+cgraphics.sfShader_setFloat2Parameter.restype = None
+
+cgraphics.sfShader_setFloat3Parameter.argtypes = [Shader, ctypes.c_char_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+cgraphics.sfShader_setFloat3Parameter.restype = None
+
+cgraphics.sfShader_setFloat4Parameter.argtypes = [Shader, ctypes.c_char_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+cgraphics.sfShader_setFloat4Parameter.restype = None
+
+cgraphics.sfShader_setVector2Parameter.argtypes = [Shader, ctypes.c_char_p, csfml.system.Vector2f]
+cgraphics.sfShader_setVector2Parameter.restype = None
+
+cgraphics.sfShader_setVector3Parameter.argtypes = [Shader, ctypes.c_char_p, csfml.system.Vector3f]
+cgraphics.sfShader_setVector3Parameter.restype = None
+
+cgraphics.sfShader_setColorParameter.argtypes = [Shader, ctypes.c_char_p, Color]
+cgraphics.sfShader_setColorParameter.restype = None
+
+cgraphics.sfShader_setTransformParameter.argtypes = [Shader, ctypes.c_char_p, Transform]
+cgraphics.sfShader_setTransformParameter.restype = None
+
+cgraphics.sfShader_setTextureParameter.argtypes = [Shader, ctypes.c_char_p, Texture]
+cgraphics.sfShader_setTextureParameter.restype = None
+
+cgraphics.sfShader_setCurrentTextureParameter.argtypes = [Shader, ctypes.c_char_p]
+cgraphics.sfShader_setCurrentTextureParameter.restype = None
+
+cgraphics.sfShader_bind.argtypes = [Shader]
+cgraphics.sfShader_bind.restype = None
+
+cgraphics.sfShader_isAvailable.argtypes = []
+cgraphics.sfShader_isAvailable.restype = csfml.system.Bool
 
 cgraphics.sfTexture_create.argtypes = [ctypes.c_uint, ctypes.c_uint]
 cgraphics.sfTexture_create.restype = Texture
