@@ -225,6 +225,106 @@ class Shader(ctypes.c_void_p):
     def is_available():
         return bool(cgraphics.sfShader_isAvailable())
 
+class Sprite(ctypes.c_void_p):
+    _owned = True
+
+    def __init__(self):
+        result = cgraphics.sfSprite_create()
+        self.value = result.value
+        result.value = 0
+
+    def copy(self):
+        return cgraphics.sfSprite_copy(self)
+
+    def __del__(self):
+        if self.value != 0 and self._owned:
+            cgraphics.sfSprite_destroy(self)
+            self.value = 0
+
+    def set_position(self, *position):
+        cgraphics.sfSprite_setPosition(self, csfml.system.Vector2f(*position))
+
+    def set_rotation(self, angle):
+        cgraphics.sfSprite_setRotation(self, angle)
+
+    def set_scale(self, *scale):
+        cgraphics.sfSprite_setScale(self, csfml.system.Vector2f(*scale))
+
+    def set_origin(self, *origin):
+        cgraphics.sfSprite_setOrigin(self, csfml.system.Vector2f(*origin))
+
+    def get_position(self):
+        return cgraphics.sfSprite_getPosition(self)
+
+    position = property(get_position, set_position)
+
+    def get_rotation(self):
+        return cgraphics.sfSprite_getRotation(self)
+
+    rotation = property(get_rotation, set_rotation)
+
+    def get_scale(self):
+        return cgraphics.sfSprite_getScale(self)
+
+    scale = property(get_scale, set_scale)
+
+    def get_origin(self):
+        return cgraphics.sfSprite_getOrigin(self)
+
+    origin = property(get_origin, set_origin)
+
+    def move(self, *offset):
+        cgraphics.sfSprite_move(self, csfml.system.Vector2f(*offset))
+
+    def rotate(self, angle):
+        cgraphics.sfSprite_rotate(self, angle)
+
+    def scale(self, *factors):
+        cgraphics.sfSprite_scale(self, csfml.system.Vector2f(*factors))
+
+    def get_transform(self):
+        return cgraphics.sfSprite_getTransform(self)
+
+    def get_inverse_transform(self):
+        return cgraphics.sfSprite_getInverseTransform(self)
+
+    _texture = None
+
+    def set_texture(self, texture, reset_rect=False):
+        cgraphics.sfSprite_setTexture(self, texture, reset_rect)
+        self._texture = texture # sfSprite_setTexture doesn't copy the texture, so make sure we keep it around
+
+    def set_texture_rect(self, rectangle):
+        cgraphics.sfSprite_setTextureRect(self, rectangle)
+
+    def set_color(self, color):
+        cgraphics.sfSprite_setColor(self, color)
+
+    def get_texture(self):
+        result = cgraphics.sfSprite_getTexture(self)
+        result._const = True
+        if self._texture is not None and self._texture.value == result.value:
+            return self._texture
+        return result
+
+    texture = property(get_texture, set_texture)
+
+    def get_texture_rect(self):
+        return cgraphics.sfSprite_getTextureRect(self)
+
+    texture_rect = property(get_texture_rect, set_texture_rect)
+
+    def get_color(self):
+        return cgraphics.sfSprite_getColor(self)
+
+    color = property(get_color, set_color)
+
+    def get_local_bounds(self):
+        return cgraphics.sfSprite_getLocalBounds(self)
+
+    def get_global_bounds(self):
+        return cgraphics.sfSprite_getGlobalBounds(self)
+
 class Texture(ctypes.c_void_p):
     def __init__(self, width, height):
         result = cgraphics.sfTexture_create(width, height)
@@ -266,8 +366,10 @@ class Texture(ctypes.c_void_p):
     def copy(self):
         return cgraphics.sfTexture_copy(self)
 
+    _const = False
+
     def __del__(self):
-        if self.value != 0:
+        if self.value != 0 and not self._const:
             cgraphics.sfTexture_destroy(self)
             self.value = 0
 
@@ -290,18 +392,28 @@ class Texture(ctypes.c_void_p):
         return cgraphics.sfTexture_copyToImage(self)
 
     def update_from_pixels(self, pixels, width, height, x, y):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_updateFromPixels(self, pixels, width, height, x, y)
 
     def update_from_image(self, image, x, y):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_updateFromImage(self, image, x, y)
 
     def update_from_window(self, window, x, y):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_updateFromWindow(self, window, x, y)
 
     def update_from_render_window(self, render_window, x, y):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_updateFromRenderWindow(self, render_window, x, y)
 
     def set_smooth(self, smooth):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_setSmooth(self, smooth)
 
     def is_smooth(self):
@@ -310,6 +422,8 @@ class Texture(ctypes.c_void_p):
     smooth = property(is_smooth, set_smooth)
 
     def set_repeated(self, repeated):
+        if self._const:
+            raise TypeError("this texture is const")
         cgraphics.sfTexture_setRepeated(self, repeated)
 
     def is_repeated(self):
@@ -581,6 +695,78 @@ cgraphics.sfShader_bind.restype = None
 
 cgraphics.sfShader_isAvailable.argtypes = []
 cgraphics.sfShader_isAvailable.restype = csfml.system.Bool
+
+cgraphics.sfSprite_create.argtypes = []
+cgraphics.sfSprite_create.restype = Sprite
+
+cgraphics.sfSprite_copy.argtypes = [Sprite]
+cgraphics.sfSprite_copy.restype = Sprite
+
+cgraphics.sfSprite_destroy.argtypes = [Sprite]
+cgraphics.sfSprite_destroy.restype = None
+
+cgraphics.sfSprite_setPosition.argtypes = [Sprite, csfml.system.Vector2f]
+cgraphics.sfSprite_setPosition.restype = None
+
+cgraphics.sfSprite_setRotation.argtypes = [Sprite, ctypes.c_float]
+cgraphics.sfSprite_setRotation.restype = None
+
+cgraphics.sfSprite_setScale.argtypes = [Sprite, csfml.system.Vector2f]
+cgraphics.sfSprite_setScale.restype = None
+
+cgraphics.sfSprite_setOrigin.argtypes = [Sprite, csfml.system.Vector2f]
+cgraphics.sfSprite_setOrigin.restype = None
+
+cgraphics.sfSprite_getPosition.argtypes = [Sprite]
+cgraphics.sfSprite_getPosition.restype = csfml.system.Vector2f
+
+cgraphics.sfSprite_getRotation.argtypes = [Sprite]
+cgraphics.sfSprite_getRotation.restype = ctypes.c_float
+
+cgraphics.sfSprite_getScale.argtypes = [Sprite]
+cgraphics.sfSprite_getScale.restype = csfml.system.Vector2f
+
+cgraphics.sfSprite_getOrigin.argtypes = [Sprite]
+cgraphics.sfSprite_getOrigin.restype = csfml.system.Vector2f
+
+cgraphics.sfSprite_move.argtypes = [Sprite, csfml.system.Vector2f]
+cgraphics.sfSprite_move.restype = None
+
+cgraphics.sfSprite_rotate.argtypes = [Sprite, ctypes.c_float]
+cgraphics.sfSprite_rotate.restype = None
+
+cgraphics.sfSprite_scale.argtypes = [Sprite, csfml.system.Vector2f]
+cgraphics.sfSprite_scale.restype = None
+
+cgraphics.sfSprite_getTransform.argtypes = [Sprite]
+cgraphics.sfSprite_getTransform.restype = Transform
+
+cgraphics.sfSprite_getInverseTransform.argtypes = [Sprite]
+cgraphics.sfSprite_getInverseTransform.restype = Transform
+
+cgraphics.sfSprite_setTexture.argtypes = [Sprite, Texture, csfml.system.Bool]
+cgraphics.sfSprite_setTexture.restype = None
+
+cgraphics.sfSprite_setTextureRect.argtypes = [Sprite, IntRect]
+cgraphics.sfSprite_setTextureRect.restype = None
+
+cgraphics.sfSprite_setColor.argtypes = [Sprite, Color]
+cgraphics.sfSprite_setColor.restype = None
+
+cgraphics.sfSprite_getTexture.argtypes = [Sprite]
+cgraphics.sfSprite_getTexture.restype = Texture
+
+cgraphics.sfSprite_getTextureRect.argtypes = [Sprite]
+cgraphics.sfSprite_getTextureRect.restype = IntRect
+
+cgraphics.sfSprite_getColor.argtypes = [Sprite]
+cgraphics.sfSprite_getColor.restype = Color
+
+cgraphics.sfSprite_getLocalBounds.argtype = [Sprite]
+cgraphics.sfSprite_getLocalBounds.restype = FloatRect
+
+cgraphics.sfSprite_getGlobalBounds.argtype = [Sprite]
+cgraphics.sfSprite_getGlobalBounds.restype = FloatRect
 
 cgraphics.sfTexture_create.argtypes = [ctypes.c_uint, ctypes.c_uint]
 cgraphics.sfTexture_create.restype = Texture
